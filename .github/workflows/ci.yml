@@ -1,0 +1,39 @@
+---
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: "${{ github.event_name == 'pull_request' }}"
+permissions: {}
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install mise
+        uses: jdx/mise-action@v5.1.1
+      - name: Install dependencies
+        run: make install
+      - name: Run pre-commit hooks on all files
+        if: github.event_name == 'push'
+        run: uv tool run pre-commit run --all-files --show-diff-on-failure
+      - name: Run pre-commit hooks on pull request changes
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: "${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA: "${{ github.event.pull_request.head.sha }}"
+        run: |
+          uv tool run pre-commit run \
+            --from-ref "${BASE_SHA}" \
+            --to-ref "${HEAD_SHA}" \
+            --show-diff-on-failure
