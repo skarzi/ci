@@ -4,6 +4,7 @@ node_modules/
 
 # Tooling caches
 .act*
+!.actrc
 
 # OS
 .DS_Store
