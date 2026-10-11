@@ -1,0 +1,24 @@
+---
+# NOTE: Runs for real on this repo's own Dependabot pull requests: approve and
+# `gh pr merge --auto --squash` for ALL dependency and update types, majors
+# included. On other pull requests the reusable job is skipped by its guard,
+# so there it only validates the caller contract (inputs, permissions).
+# Prerequisites: the caller repo settings in `dependabot-auto-merge.yml`.
+# Without required status checks on `main`, `gh` merges immediately.
+name: Auto-merge Dependabot PRs
+on:
+  pull_request:
+permissions: {}
+jobs:
+  auto-merge-dependabot:
+    name: Auto-merge Dependabot pull request
+    permissions:
+      contents: write
+      pull-requests: write
+    # NOTE: zizmor `self-repository` wants `$/`, but actionlint rejects it.
+    # TODO(skarzi): switch to `$/` and drop the zizmor ignore once actionlint
+    # supports it: Reference: https://github.com/rhysd/actionlint/issues/711
+    uses: ./.github/workflows/dependabot-auto-merge.yml  # zizmor: ignore[self-repository]
+    with:
+      merge-method: squash
+      dependency-type: ""
