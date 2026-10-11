@@ -1,0 +1,96 @@
+---
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v6.0.0"
+    hooks:
+      - id: trailing-whitespace
+        name: Trim trailing whitespaces
+        args:
+          - --markdown-linebreak-ext=md
+        stages:
+          - pre-commit
+      - id: end-of-file-fixer
+        name: Ensure file ends with a newline
+        stages:
+          - pre-commit
+      - id: check-added-large-files
+        name: Check for added large files
+        stages:
+          - pre-commit
+  - repo: local
+    hooks:
+      - id: lint-commit-message
+        name: Lint commit messages
+        language: system
+        pass_filenames: true
+        always_run: true
+        entry: make lint-commit-message --
+        stages:
+          - commit-msg
+      - id: lint-makefile
+        name: Lint Makefile
+        language: system
+        types:
+          - makefile
+        pass_filenames: true
+        entry: make lint-makefile --
+        stages:
+          - pre-commit
+      - id: lint-pre-commit-hook-config
+        name: Lint pre-commit config
+        language: system
+        files: '^\.pre-commit-config\.yaml$'
+        pass_filenames: false
+        entry: make lint-pre-commit-hook-config
+        stages:
+          - pre-commit
+      - id: lint-yaml
+        name: Lint YAML files
+        language: system
+        types:
+          - yaml
+        pass_filenames: true
+        entry: make lint-yaml --
+        stages:
+          - pre-commit
+      - id: lint-github-actions
+        name: Lint GitHub Actions
+        language: system
+        types:
+          - yaml
+        files: '^\.github/workflows/'
+        pass_filenames: true
+        entry: make lint-github-actions --
+        stages:
+          - pre-commit
+      - id: lint-security
+        name: Scan GitHub Actions for security flaws
+        language: system
+        types:
+          - yaml
+        files: '^(\.github/|actions/)'
+        pass_filenames: false
+        entry: make lint-security
+        stages:
+          - pre-commit
+      - id: lint-fix-markdown
+        name: Lint and fix Markdown files
+        language: system
+        types:
+          - markdown
+        pass_filenames: true
+        entry: make lint-fix-markdown --
+        stages:
+          - pre-commit
+      - id: lint-fix-toml
+        name: Lint and fix TOML files
+        language: system
+        types:
+          - toml
+        pass_filenames: true
+        entry: make lint-fix-toml --
+        stages:
+          - pre-commit
