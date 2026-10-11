@@ -60,10 +60,10 @@ lint-pre-commit-hook-config:
 lint-github-actions:
 	@actionlint $(EXTRA_ARGS)
 
-#: Scan GitHub Actions for security flaws.
-.PHONY: lint-security
-lint-security:
-	@zizmor $(or $(EXTRA_ARGS),.)
+#: Scan GitHub Actions for security flaws and fix them.
+.PHONY: lint-fix-security
+lint-fix-security:
+	@zizmor --fix $(or $(EXTRA_ARGS),.)
 
 #: Lint YAML files.
 .PHONY: lint-yaml
@@ -88,7 +88,7 @@ lint-fix-toml:
 #: Lint and fix the whole project.
 .PHONY: lint-fix
 lint-fix: lint-makefile lint-pre-commit-hook-config lint-yaml \
-	lint-github-actions lint-security lint-fix-markdown lint-fix-toml
+	lint-github-actions lint-fix-security lint-fix-markdown lint-fix-toml
 
 #: Run GitHub Actions workflow(s) locally using `act`.
 .PHONY: act

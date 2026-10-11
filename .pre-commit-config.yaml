@@ -66,14 +66,14 @@ repos:
         entry: make lint-github-actions --
         stages:
           - pre-commit
-      - id: lint-security
-        name: Scan GitHub Actions for security flaws
+      - id: lint-fix-security
+        name: Scan and fix GitHub Actions security flaws
         language: system
         types:
           - yaml
         files: '^(\.github/|actions/)'
         pass_filenames: false
-        entry: make lint-security
+        entry: make lint-fix-security
         stages:
           - pre-commit
       - id: lint-fix-markdown
