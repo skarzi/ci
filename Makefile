@@ -95,18 +95,14 @@ lint-fix: lint-makefile lint-pre-commit-hook-config lint-yaml \
 act:
 	@act $(or $(EXTRA_ARGS),pull_request)
 
-#: Run all project tests.
-.PHONY: test
-test: act
-
 #: Clean project artifacts.
 .PHONY: clean
 clean:
 	@rm -rf node_modules/ .venv/
 
-#: Install, lint, and test.
+#: Install, lint, and fix
 .PHONY: all
-all: install lint-fix test
+all: install lint-fix
 
 #: Show available targets.
 .PHONY: help
