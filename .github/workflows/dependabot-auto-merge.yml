@@ -1,0 +1,96 @@
+---
+# NOTE: Setup required in the GitHub UI of each caller repo:
+# 1. Settings > General > Pull Requests > enable "Allow auto-merge".
+# 2. Settings > Actions > General > Workflow permissions > enable
+#    "Allow GitHub Actions to create and approve pull requests". Needed for
+#    `gh pr review --approve` with `github.token`.
+# 3. Protect the base branch (branch protection or ruleset) with required
+#    status checks. Without unmet requirements, `gh pr merge --auto` merges
+#    at once, even while CI is pending or failing. GitHub Free: no
+#    protection on private personal repos.
+# 4. Caller workflow triggers on `pull_request_target` (as in the `README.md`
+#    example) and grants `contents: write` and `pull-requests: write` in its
+#    own `permissions:`. A reusable workflow cannot widen permissions.
+name: Dependabot Auto-Merge
+on:
+  workflow_call:
+    inputs:
+      merge-method:
+        description: Merge method (squash, rebase, merge)
+        type: string
+        default: squash
+        required: false
+      dependency-type:
+        description: Only match this dependency type (empty matches any)
+        type: string
+        default: direct:development
+        required: false
+      update-type:
+        description: Only match this update type (empty matches any)
+        type: string
+        default: ""
+        required: false
+    outputs:
+      merge-status:
+        description: Whether the pull request matched the filters (true) or not (false)
+        value: "${{ jobs.auto-merge.outputs.status }}"
+permissions: {}
+jobs:
+  auto-merge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      status: "${{ steps.evaluate.outputs.match }}"
+    steps:
+      - name: Validate merge method
+        env:
+          MERGE_METHOD: "${{ inputs.merge-method }}"
+        run: |
+          case "${MERGE_METHOD}" in
+            squash | rebase | merge) ;;
+            *)
+              echo "::error::Invalid merge-method '${MERGE_METHOD}'. Use squash, rebase or merge."
+              exit 1
+              ;;
+          esac
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@v3.1.0
+      - name: Evaluate dependency criteria
+        id: evaluate
+        env:
+          DEPENDENCY_TYPE: "${{ steps.dependabot-metadata.outputs.dependency-type }}"
+          UPDATE_TYPE: "${{ steps.dependabot-metadata.outputs.update-type }}"
+          TARGET_DEPENDENCY_TYPE: "${{ inputs.dependency-type }}"
+          TARGET_UPDATE_TYPE: "${{ inputs.update-type }}"
+        run: |
+          if [ -n "${TARGET_DEPENDENCY_TYPE}" ] \
+            && [ "${DEPENDENCY_TYPE}" != "${TARGET_DEPENDENCY_TYPE}" ]; then
+            echo "match=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          if [ -n "${TARGET_UPDATE_TYPE}" ] \
+            && [ "${UPDATE_TYPE}" != "${TARGET_UPDATE_TYPE}" ]; then
+            echo "match=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          echo "match=true" >> "${GITHUB_OUTPUT}"
+      - name: Approve and enable auto-merge
+        if: steps.evaluate.outputs.match == 'true'
+        env:
+          GH_TOKEN: "${{ github.token }}"
+          PULL_REQUEST_URL: "${{ github.event.pull_request.html_url }}"
+          MERGE_METHOD: "${{ inputs.merge-method }}"
+        run: |
+          review_decision="$(
+            gh pr view "${PULL_REQUEST_URL}" --json reviewDecision --jq .reviewDecision
+          )"
+          if [ "${review_decision}" != "APPROVED" ]; then
+            gh pr review --approve "${PULL_REQUEST_URL}"
+          fi
+          gh pr merge --auto "--${MERGE_METHOD}" "${PULL_REQUEST_URL}"
