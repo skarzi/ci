@@ -1,0 +1,9 @@
+# Dependencies
+node_modules/
+
+# Tooling caches
+.act*
+
+# OS
+.DS_Store
+Thumbs.db
