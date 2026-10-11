@@ -1,11 +1,9 @@
 [tools]
 # Runtimes
 node = "26"
-uv = "latest"
+uv   = "latest"
 
 # Linters and formatters
 actionlint = "latest"
-checkmake = "latest"
-shellcheck = "latest"
-shfmt = "latest"
-zizmor = "latest"
+checkmake  = "latest"
+zizmor     = "latest"
