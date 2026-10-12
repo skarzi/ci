@@ -10,7 +10,7 @@
     "test": "bun test scripts/typescript"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.0.0",
+    "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^19.0.0",
     "@types/bun": "^1.4.2",
     "@types/semver": "^7.8.0",
