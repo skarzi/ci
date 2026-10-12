@@ -6,11 +6,15 @@
 #    `gh pr review --approve` with `github.token`.
 # 3. Protect the base branch (branch protection or ruleset) with required
 #    status checks. Without unmet requirements, `gh pr merge --auto` merges
-#    at once, even while CI is pending or failing. GitHub Free: no
-#    protection on private personal repos.
-# 4. Caller workflow triggers on `pull_request_target` (as in the `README.md`
-#    example) and grants `contents: write` and `pull-requests: write` in its
-#    own `permissions:`. A reusable workflow cannot widen permissions.
+#    at once, even while CI is pending or failing. GitHub Free private repos
+#    have no branch protection, rulesets or auto-merge (all public-only on
+#    Free), so matching PRs merge at once there.
+# 4. Caller workflow grants `contents: write` and `pull-requests: write` in
+#    its own `permissions:`. A reusable workflow cannot widen permissions, and
+#    without them the call can fail with `startup_failure` (always so for
+#    Dependabot `pull_request` runs). Always set them. Both `pull_request`
+#    and `pull_request_target` work as triggers: explicit `permissions` raise
+#    the read-only token Dependabot gets on `pull_request`.
 name: Dependabot Auto-Merge
 on:
   workflow_call:
