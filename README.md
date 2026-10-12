@@ -22,7 +22,7 @@ PR (unless approved) and runs `gh pr merge --auto --<merge-method>`.
 ```yaml
 ---
 name: Auto-merge Dependabot development dependency PRs
-"on": pull_request_target
+"on": pull_request
 permissions:
   contents: write
   pull-requests: write
@@ -35,27 +35,21 @@ jobs:
       dependency-type: direct:development
 ```
 
-`pull_request` works as the trigger too. `@v1` exists only after the first
-release (see [Releases](#releases)).
+`@v1` exists only after the first release (see [Releases](#releases)).
 
-If you lint with zizmor, it reports two findings on this example:
+If you lint with zizmor, it reports `unpinned-uses` on this example: `@v1` is
+not a hash. Pin a commit hash, or allow tag pins for your own actions in
+`.github/zizmor.yml` (the key is a pattern: `"skarzi/ci"` without `/*` does
+not match):
 
-- `unpinned-uses`: `@v1` is not a hash. Pin a commit hash, or allow tag pins
-  for your own actions in `.github/zizmor.yml` (the key is a pattern:
-  `"skarzi/ci"` without `/*` does not match):
-
-  ```yaml
-  ---
-  rules:
-    unpinned-uses:
-      config:
-        policies:
-          "skarzi/*": ref-pin
-  ```
-
-- `dangerous-triggers`: `pull_request_target`. The workflow never checks out
-  PR code. Suppress with `# zizmor: ignore[dangerous-triggers]` and a
-  justification, or use `pull_request`.
+```yaml
+---
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        "skarzi/*": ref-pin
+```
 
 ### Inputs
 

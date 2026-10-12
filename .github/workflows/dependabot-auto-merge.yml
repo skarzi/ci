@@ -12,9 +12,9 @@
 # 4. Caller workflow grants `contents: write` and `pull-requests: write` in
 #    its own `permissions:`. A reusable workflow cannot widen permissions, and
 #    without them the call can fail with `startup_failure` (always so for
-#    Dependabot `pull_request` runs). Always set them. Both `pull_request`
-#    and `pull_request_target` work as triggers: explicit `permissions` raise
-#    the read-only token Dependabot gets on `pull_request`.
+#    Dependabot `pull_request` runs). Always set them. Trigger on
+#    `pull_request`: explicit `permissions` raise the read-only token Dependabot
+#    gets there, and no secrets are needed.
 name: Dependabot Auto-Merge
 on:
   workflow_call:
