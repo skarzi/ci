@@ -35,8 +35,6 @@ jobs:
       dependency-type: direct:development
 ```
 
-`@v1` exists only after the first release (see [Releases](#releases)).
-
 If you lint with zizmor, it reports `unpinned-uses` on this example: `@v1` is
 not a hash. Pin a commit hash, or allow tag pins for your own actions in
 `.github/zizmor.yml` (the key is a pattern: `"skarzi/ci"` without `/*` does

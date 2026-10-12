@@ -125,7 +125,7 @@ release:
 clean:
 	@rm -rf node_modules/ .venv/
 
-#: Install, lint, and fix
+#: Install, lint, fix, and run tests.
 .PHONY: all
 all: install lint-fix test
 
