@@ -94,3 +94,21 @@ repos:
         entry: make lint-fix-toml --
         stages:
           - pre-commit
+      - id: lint-fix-typescript
+        name: Lint and fix TypeScript files
+        language: system
+        types:
+          - ts
+        files: '^scripts/'
+        pass_filenames: true
+        entry: make lint-fix-typescript --
+        stages:
+          - pre-commit
+      - id: test-typescript
+        name: Run TypeScript tests
+        language: system
+        files: '^(scripts/typescript/|package(-lock)?\.json$|tsconfig\.json$)'
+        pass_filenames: false
+        entry: make test-typescript
+        stages:
+          - pre-commit

@@ -85,15 +85,40 @@ lint-fix-markdown:
 lint-fix-toml:
 	@uv run tombi format $(EXTRA_ARGS) && uv run tombi lint $(EXTRA_ARGS)
 
+#: Format, lint and fix TypeScript files, then type check.
+.PHONY: lint-fix-typescript
+lint-fix-typescript:
+	@npm run format:ts -- $(or $(EXTRA_ARGS),scripts/)
+	@npm run lint:ts -- $(or $(EXTRA_ARGS),scripts/)
+	@npm run lint:types
+
 #: Lint and fix the whole project.
 .PHONY: lint-fix
 lint-fix: lint-makefile lint-pre-commit-hook-config lint-yaml \
-	lint-github-actions lint-fix-security lint-fix-markdown lint-fix-toml
+	lint-github-actions lint-fix-security lint-fix-markdown lint-fix-toml \
+	lint-fix-typescript
+
+#: Run TypeScript tests.
+.PHONY: test-typescript
+test-typescript:
+	@npm run test
+
+#: Run all tests.
+.PHONY: test
+test: test-typescript
 
 #: Run GitHub Actions workflow(s) locally using `act`.
 .PHONY: act
 act:
 	@act $(or $(EXTRA_ARGS),pull_request)
+
+# TODO(skarzi): Call this stage from a dedicated release workflow. Manual for
+# now: `GITHUB_TOKEN` is refused for refs touching `.github/workflows/*`, so an
+# App token or PAT is needed.
+#: Tag and push release: `make release -- [major|minor|patch]` (default: patch).
+.PHONY: release
+release:
+	@bun scripts/typescript/release.ts $(or $(EXTRA_ARGS),patch)
 
 #: Clean project artifacts.
 .PHONY: clean
@@ -102,7 +127,7 @@ clean:
 
 #: Install, lint, and fix
 .PHONY: all
-all: install lint-fix
+all: install lint-fix test
 
 #: Show available targets.
 .PHONY: help

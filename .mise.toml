@@ -1,5 +1,6 @@
 [tools]
 # Runtimes
+bun  = "1"
 node = "26"
 uv   = "latest"
 
